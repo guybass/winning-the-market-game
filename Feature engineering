@@ -1,0 +1,85 @@
+# Path to scrape data
+path = r"https://www.macrotrends.net/stocks/sector/10/computer-and-technology"
+
+# Get the text of the HTML and split by rows 
+html = requests.get(path).text.split('\n')
+
+# Set up Original and Final data
+original_data, final_data = html[277].split(',')[4:], {'sector_name':[],"stock_count":[],"market_cap":[],
+                                                       "pe_ratio":[],"price_book":[],"div_yield":[],
+                                                      "cons_recom_curr":[],"held_by_insiders_pct":[],
+                                                     "ps_ratio":[], "held_by_institutions_pct":[]}
+
+# Proces the data
+for var in original_data:
+    if "zacks_x_ind_title" in var:
+        name = var.split(':')[1].strip("'").strip('"')
+        final_data['sector_name'].append(name)
+    elif "stock_count" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["stock_count"].append(float(temp))
+    elif "market_cap" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["market_cap"].append(float(temp))
+    elif "pe_ratio" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["pe_ratio"].append(float(temp))
+    elif "ps_ratio" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["ps_ratio"].append(float(temp))
+    elif "price_book" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["price_book"].append(float(temp))
+    elif "div_yield" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["div_yield"].append(float(temp))
+    elif "cons_recom_curr" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["cons_recom_curr"].append(float(temp))
+    elif "held_by_insiders_pct" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["held_by_insiders_pct"].append(float(temp))
+    elif "held_by_institutions_pct" in var:
+        temp = var.split(":")[1].strip('"')
+        final_data["held_by_institutions_pct"].append(float(temp))
+sector_df = pd.DataFrame(final_data)
+sector_df.to_csv('Sector_data.csv')
+
+# Set-up Kmeans
+kmean = KMeans(n_clusters = 15, random_state=42)
+
+# Save sector name
+y = sector_df['sector_name'].copy() 
+
+# Drop it
+sector_df.drop('sector_name', axis=1, inplace=True)
+
+# Fit the Kmeans
+kmean.fit(sector_df)
+
+# Get the clusters and names
+sector_df['clusters'] = kmean.predict(sector_df)
+sector_df['sector_name'] = y
+
+# get new features
+kmeans_features = sector_df[['sector_name', 'clusters']].copy()
+print(sector_df)
+
+# set up hierarchy
+hierarchy = AgglomerativeClustering(n_clusters = 15,affinity='l2', linkage='complete')
+
+# Save sector name
+y = sector_df[['sector_name', 'clusters']]
+
+# Drop it
+sector_df.drop(['sector_name', 'clusters'], axis=1, inplace=True)
+
+# Fit hierarchy and get the clusters and names
+clusters_2 = hierarchy.fit_predict(sector_df)
+sector_df['clusters_2'], sector_df['clusters'], sector_df['sector_name'] = clusters_2, y['clusters'], y['sector_name']
+# Set festures
+hierarchy_features = sector_df[['sector_name', 'clusters_2']]
+
+# Save features
+hierarchy_features.to_csv('hierarchy_features.csv')
+kmeans_features.to_csv('kmeans_features.csv')
