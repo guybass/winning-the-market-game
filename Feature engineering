@@ -83,3 +83,47 @@ hierarchy_features = sector_df[['sector_name', 'clusters_2']]
 # Save features
 hierarchy_features.to_csv('hierarchy_features.csv')
 kmeans_features.to_csv('kmeans_features.csv')
+
+# Set the stracture for features
+res = {'kmeans_features':[], 'hierarchy_features':[]}
+
+# Load the map and feature
+map_sector = pd.read_csv("../input/sectormap/sectors_map.csv")
+map_sector.drop('Unnamed: 0', inplace=True, axis=1)
+hierarchy_features = pd.read_csv("../input/features-and-co/hierarchy_features(1).csv").drop('Unnamed: 0', axis=1)
+kmeans_features = pd.read_csv("../input/features-and-co/kmeans_features(1).csv").drop('Unnamed: 0', axis=1)
+kmeans_features['sector_name'] = kmeans_features['sector_name'].apply(lambda x: x.lower()).apply(lambda x: x.replace('-', " "))
+hierarchy_features['sector_name'] = hierarchy_features['sector_name'].apply(lambda x: x.lower()).apply(lambda x: x.replace('-', " "))
+
+# Load names of companies
+names_of_companies = df['company_name_and_tick']
+
+# Count names
+counter = {}
+for name in names_of_companies:
+    counter[name] = counter.get(name, 0) + 1
+
+
+names_seen = set()
+for name in names_of_companies:
+    if name in names_seen: continue
+    else:
+        names_seen.add(name)
+        for col in map_sector.columns:
+            if name[3:-3] in "".join(list(set(map_sector[col]))):
+                industry = col
+                break
+        
+        k_feat = list(kmeans_features[kmeans_features['sector_name']==industry]['clusters'].values) * counter[name]
+        hierarchy_feat = list(hierarchy_features[hierarchy_features['sector_name']==industry]['clusters_2'].values) * counter[name]
+        res['kmeans_features'] += k_feat
+        res['hierarchy_features'] += hierarchy_feat 
+                
+df['kmeans_features'] = res['kmeans_features']
+df['hierarchy_features'] = res['hierarchy_features']
+
+# Convert categories to dimensions
+tempo_df = pd.get_dummies(df_kmeans['kmeans_features'])
+df_kmeans = df_kmeans.join(tempo_df)
+tempo_df = pd.get_dummies(df_hierarchy['hierarchy_features'])
+df_hierarchy = df_hierarchy.join(tempo_df)
