@@ -1,0 +1,16 @@
+def auto_encoder_decoder(input_shape, first_enc, second_enc):
+    """
+    This is a model for auto-encoder using wrappers
+    :param input_shape: int the input shape
+    :param first_enc: first dim reduction
+    :param second_enc: second dim reduction
+    :return: Sequential model
+    """
+    # Set up architecture
+    model_ = Sequential()
+    model_.add(Dense(first_enc, activation='relu', input_shape=(1,input_sape)))
+    model_.add(Dense(second_enc, activation='relu'))
+    model_.add(Dense(nput_sape, activation='linear'))
+    
+    model_.compile(loss=tf.keras.losses.MeanSquaredError(),
+               optimizer=tf.keras.optimizers.Adam(learning_rate=0.01))
