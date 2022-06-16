@@ -8,7 +8,8 @@ The first AI building can be divided into three parts:
 
 # The three main parts:
 **First part - getting the data, and arranging it**
-The data collection part can be divided into two sections, finding the source of the data and taking it - both made by scraping
+The data collection part can be divided into two sections, finding the source of the data and taking it - both made by scraping.
+The are not public - using: Scrapy, request, webbroser, javascript, CSS and Xpath
 
 **Second part - preparing the data and EDA**
 In this part, we will look at feature engineering and EDA, as well as preparing the dataset for learning.
