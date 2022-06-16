@@ -1,4 +1,4 @@
-def auto_encoder_decoder(input_shape, first_enc, second_enc):
+def auto_encoder_decoder(input_shape, first_enc, second_enc, patience=3):
     """
     This is a model for auto-encoder using wrappers
     :param input_shape: int the input shape
@@ -11,6 +11,10 @@ def auto_encoder_decoder(input_shape, first_enc, second_enc):
     model_.add(Dense(first_enc, activation='relu', input_shape=(1,input_sape)))
     model_.add(Dense(second_enc, activation='relu'))
     model_.add(Dense(nput_sape, activation='linear'))
+    
+    early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss',
+                                                    patience=patience,
+                                                    mode='min')
     
     model_.compile(loss=tf.keras.losses.MeanSquaredError(),
                optimizer=tf.keras.optimizers.Adam(learning_rate=0.01))
