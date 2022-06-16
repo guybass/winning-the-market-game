@@ -1,0 +1,24 @@
+def train_valid_test(df, pe_val, pe_test):
+    """
+    This function provide traind df, valid df, and test df
+    
+    df - DataFrame
+    """
+    names = df['company_name_and_tick'].unique()
+    train = df[df['company_name_and_tick'] == names[0]]
+    train, val_test = train_test_split(train, test_size=pe_val+pe_test, shuffle=False)
+    val, test = train_test_split(val_test, test_size=pe_test/(pe_val+pe_test), shuffle=False)
+    
+    for i in range(1, len(names)):
+        val_test =df[df['company_name_and_tick'] == names[i]]
+        if len(val_test.index) < 9:
+            train = pd.concat([train, val_test], ignore_index=True)
+        else:
+            df = df.drop(val_test.index)
+            train_, val_test = train_test_split(val_test, test_size=pe_val+pe_test, shuffle=False)
+            val_, test_ = train_test_split(val_test, test_size=pe_test/(pe_val+pe_test), shuffle=False)
+            train = pd.concat([train, train_], ignore_index=True)
+            val = pd.concat([val, val_], ignore_index=True)
+            test = pd.concat([test, test_], ignore_index=True) 
+    
+    return train, val, test
