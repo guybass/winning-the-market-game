@@ -1,3 +1,7 @@
+Our goal is to make the "company name" a categorical data, which would allow us to also make the inputs as time series. 
+Although there are 755 companies and only 91 features, it would yield a very high dimension if done by brute force . 
+To do so, we would apply Kmeans to the "Computer and Technology Sector - Industry List", which groups sectors based on the following data.
+
 # Path to scrape data
 path = r"https://www.macrotrends.net/stocks/sector/10/computer-and-technology"
 
